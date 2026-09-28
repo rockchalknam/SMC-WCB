@@ -1,161 +1,169 @@
-<!doctype html>
-<html lang="en">
-<head>
-<base target="_top">
-<meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--sky:#6fcaf0;--sky2:#bfe9fb;--block:#ffcc33;--block-edge:#c98a00;--ink:#2b1a0e;--brick:#d9432f;--grass:#46b04a;--dirt:#b8743c;--paper:#fff;--text:#20160c;--focus:#1b3fd1}
-@media (prefers-color-scheme:dark){:root{--sky:#1b2556;--sky2:#2c3a7a;--paper:#1f2748;--text:#fff;--focus:#ffd84d}}
-*,*::before,*::after{box-sizing:border-box}
-body{margin:0;min-height:100vh;font:400 1.15rem/1.45 Nunito,"Segoe UI",system-ui,sans-serif;color:var(--text);background:linear-gradient(var(--sky2),var(--sky) 320px) fixed,var(--sky)}
-.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 120px}
-h1{font:400 clamp(2.4rem,7vw,4.6rem)/1 Bungee,Impact,"Arial Black",sans-serif;margin:0;color:var(--block);-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 6px 0 var(--ink)}
-.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:26px 0 0;padding:0;list-style:none;counter-reset:s}
-.how li{counter-increment:s;background:var(--paper);border:3px solid var(--ink);border-radius:12px;padding:14px 16px 14px 62px;position:relative;font-weight:700}
-.how li::before{content:counter(s);position:absolute;left:14px;top:12px;width:36px;height:36px;border-radius:50%;background:var(--brick);color:#fff;font:400 1.2rem/36px Bungee,sans-serif;text-align:center;border:3px solid var(--ink)}
-.note{margin:12px 0 0;font-weight:700;opacity:.85}
-.find{display:block;width:100%;max-width:520px;margin:28px 0 12px;font:800 1.25rem Nunito,sans-serif;padding:14px 18px;border:4px solid var(--ink);border-radius:12px;background:var(--paper);color:var(--text)}
-.bar{display:flex;flex-wrap:wrap;gap:10px}
-.chip{font:800 1rem Nunito,sans-serif;padding:8px 14px;border-radius:999px;border:3px solid var(--ink);background:var(--paper);color:var(--text);cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--brick);color:#fff}
-h2{font:400 1.6rem Bungee,Impact,sans-serif;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ink);margin:34px 0 14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
-.lvl{text-align:left;cursor:pointer;border:4px solid var(--ink);border-radius:12px;background:var(--block);color:#20160c;padding:16px;min-height:120px;font-family:inherit;box-shadow:inset 0 -6px 0 var(--block-edge),0 6px 0 var(--ink);transition:transform .08s,box-shadow .08s;display:flex;flex-direction:column;gap:6px}
-.lvl:hover{transform:translateY(-2px);box-shadow:inset 0 -6px 0 var(--block-edge),0 8px 0 var(--ink)}
-.lvl:active{transform:translateY(5px);box-shadow:inset 0 -6px 0 var(--block-edge),0 1px 0 var(--ink)}
-.lvl .nm{font:400 1.4rem/1.1 Bungee,Impact,sans-serif}
-.lvl .tt{font-weight:700;font-size:1rem;opacity:.85}
-.lvl .go{margin-top:auto;align-self:flex-start;font-weight:800;font-size:1rem;background:var(--brick);color:#fff;border:3px solid var(--ink);border-radius:8px;padding:3px 12px}
-.lvl.done{background:var(--grass);color:#fff;box-shadow:inset 0 -6px 0 #2e7d32,0 6px 0 var(--ink)}
-button:focus-visible,input:focus-visible,a:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
-.empty{background:var(--paper);border:4px dashed var(--ink);border-radius:14px;padding:24px;font-weight:700;max-width:620px}
-.updated{margin-top:40px;font-weight:700;opacity:.8}
-.ground{position:fixed;left:0;right:0;bottom:0;height:34px;border-top:4px solid var(--ink);background:linear-gradient(var(--grass) 0 10px,transparent 10px),repeating-conic-gradient(var(--dirt) 0 25%,#a0622e 0 50%) 0 10px/24px 24px}
-.modal{position:fixed;inset:0;background:rgba(20,12,4,.65);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
-.modal.open{display:flex}
-.box{background:#fff;color:#20160c;border:4px solid var(--ink);border-radius:16px;padding:24px;max-width:540px;width:100%}
-.box h3{font:400 1.5rem/1.15 Bungee,Impact,sans-serif;margin:0 0 12px}
-.box p{margin:0 0 14px;font-size:1.15rem}
-.box .steps{background:#fff6d6;border:3px solid var(--ink);border-radius:10px;padding:12px 14px 12px 40px;font-weight:700;margin:0 0 14px}
-.box .steps li{margin:4px 0}
-.box .steps b{color:var(--brick)}
-.box textarea{width:100%;height:130px;font:600 .85rem ui-monospace,Menlo,monospace;border:3px solid var(--ink);border-radius:8px;padding:8px;margin-bottom:14px}
-.actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-end}
-.btn{font:800 1.15rem Nunito,sans-serif;padding:12px 20px;border:3px solid var(--ink);border-radius:12px;background:#fff;color:#20160c;cursor:pointer;text-decoration:none;box-shadow:0 4px 0 var(--ink)}
-.btn.big{background:var(--brick);color:#fff}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
-</head>
-<body>
-<div id="app"></div>
-<div class="ground" aria-hidden="true"></div>
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mh">
-  <div class="box" id="box"></div>
-</div>
-<script>
-const DATA = <?!= dataJson ?>;
-const GAME_URL = <?!= gameUrl ?>;
-const PASTE_STEPS = <?!= pasteSteps ?>;
-const ORDER = ['1st','2nd','3rd','4th','5th','6th','7th'];
-const levels = DATA.levels.map((l,i)=>Object.assign({i},l));
-const periods = [...new Set(levels.map(l=>l.period))]
-  .sort((a,b)=>(ORDER.indexOf(a)+1||99)-(ORDER.indexOf(b)+1||99));
-let period='All', query='';
-const played=new Set();
+/**
+ * Level Arcade data feed.
+ * Reads Google Form level-code uploads (.txt or Google Doc) and serves them
+ * as JSON to the Level Arcade page hosted on GitHub Pages.
+ * Paste this into Extensions > Apps Script on the form's response sheet.
+ */
 
-const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const firstName=n=>String(n).split(' ')[0];
-const stepsHTML=()=>PASTE_STEPS.length?`<p style="margin-bottom:6px"><b>In the game tab:</b></p><ol class="steps">${PASTE_STEPS.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:'';
+const CONFIG = {
+  SHEET_NAME: 'Form Responses 1',          // tab the form writes to
+  DATA_FILE_NAME: 'level-arcade-data.json', // cache file the page reads
+  PAGE_TITLE: 'Level Arcade'
+};
 
-async function copyText(text){
-  try{ await navigator.clipboard.writeText(text); return true; }catch(e){}
-  try{
-    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); ta.remove(); return ok;
-  }catch(e){ return false; }
+/* ---------- Sheet menu ---------- */
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('Level Arcade')
+    .addItem('Set up auto-update (run once)', 'setupTrigger')
+    .addItem('Rebuild all levels now', 'rebuildAll')
+    .addToUi();
 }
 
-function block(l){
-  return `<button class="lvl ${played.has(l.i)?'done':''}" data-i="${l.i}">
-    <span class="nm">${esc(l.name)}</span>${l.title?`<span class="tt">${esc(l.title)}</span>`:''}
-    <span class="go">${played.has(l.i)?'Play again':'Play'}</span></button>`;
+function setupTrigger() {
+  const ss = SpreadsheetApp.getActive();
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'onSubmit')
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('onSubmit').forSpreadsheet(ss).onFormSubmit().create();
+  const n = rebuildLevels_(false);
+  SpreadsheetApp.getUi().alert(`Auto-update is on. ${n} levels loaded.`);
 }
 
-function render(){
-  const q=query.trim().toLowerCase();
-  const match=l=>!q||(l.name+' '+(l.title||'')).toLowerCase().includes(q);
-  const groups=(period==='All'?periods:[period]).map(p=>{
-    const list=levels.filter(l=>l.period===p&&match(l)).sort((a,b)=>a.name.localeCompare(b.name));
-    return list.length?`<section><h2>${esc(p)} period</h2><div class="grid">${list.map(block).join('')}</div></section>`:'';
-  }).join('');
-  const upd=DATA.updated?new Date(DATA.updated).toLocaleString([],{dateStyle:'medium',timeStyle:'short'}):null;
+/* ---------- Triggers ---------- */
 
-  document.getElementById('app').innerHTML=`<div class="wrap">
-    <h1>Level Arcade</h1>
-    <ol class="how">
-      <li>Find your student's name below.</li>
-      <li>Click their Play button.</li>
-      <li>Follow the short steps that pop up. That's it!</li>
-    </ol>
-    <p class="note">Works best on a laptop or desktop computer with a keyboard.</p>
-    ${levels.length?`
-      <input class="find" type="search" placeholder="Type your student's first name" aria-label="Type your student's first name" value="${esc(query)}">
-      ${periods.length>1?`<div class="bar" role="toolbar" aria-label="Show one class period">
-        ${['All',...periods].map(p=>`<button class="chip" data-p="${esc(p)}" aria-pressed="${p===period}">${p==='All'?'All classes':esc(p)+' period'}</button>`).join('')}
-      </div>`:''}
-      ${groups||'<p class="empty" style="margin-top:20px">No one by that name yet. Check the spelling, or try just the first few letters.</p>'}`
-    :'<p class="empty" style="margin-top:26px">No levels yet. They show up here after students turn them in.</p>'}
-    ${upd?`<p class="updated">Last updated ${esc(upd)}.</p>`:''}
-  </div>`;
+// Runs on every form submission. Only reads files it hasn't seen before.
+function onSubmit() {
+  rebuildLevels_(false);
 }
 
-function openModal(html){
-  document.getElementById('box').innerHTML=html;
-  document.getElementById('modal').classList.add('open');
-  (document.querySelector('#box [data-focus]')||document.querySelector('#box button')).focus();
+// Menu option: re-reads every file from scratch (use if a code looks wrong).
+function rebuildAll() {
+  const n = rebuildLevels_(true);
+  SpreadsheetApp.getUi().alert(`Rebuilt ${n} levels.`);
 }
-function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 
-async function play(l){
-  const ok=await copyText(l.code);
-  played.add(l.i); render();
-  const who=esc(firstName(l.name));
-  const openBtn=GAME_URL?`<a class="btn big" href="${esc(GAME_URL)}" target="_blank" rel="noopener" data-focus data-act="opened">Open the game</a>`:'';
-  if(ok){
-    openModal(`<h3 id="mh">${who}'s level is copied!</h3>
-      <p>${GAME_URL?'Click <b>Open the game</b> below. It opens in a new tab.':'Open Super Mario Construct.'}</p>
-      ${stepsHTML()}
-      <p>To play another level, come back to this tab.</p>
-      <div class="actions"><button class="btn" data-act="close">Close</button>${openBtn}</div>`);
-  }else{
-    openModal(`<h3 id="mh">One extra step for ${who}'s level</h3>
-      <p>This computer didn't let us copy automatically. The code below is already selected. Press <b>Ctrl+C</b> (on a Mac, <b>Cmd+C</b>) to copy it.</p>
-      <textarea readonly>${esc(l.code)}</textarea>
-      ${stepsHTML()}
-      <div class="actions"><button class="btn" data-act="close">Close</button>${openBtn}</div>`);
-    const ta=document.querySelector('#box textarea'); ta.focus(); ta.select();
+/* ---------- Core ---------- */
+
+function rebuildLevels_(fresh) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(120000); // class submits at once, so take turns
+  try {
+    const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.SHEET_NAME);
+    const rows = sheet.getDataRange().getValues();
+    const head = rows.shift().map(h => String(h));
+    const col = re => head.findIndex(h => re.test(h));
+
+    const C = {
+      time: col(/timestamp/i),
+      email: col(/email/i),
+      first: col(/first/i),
+      last: col(/last/i),
+      period: col(/period/i),
+      title: col(/title/i),
+      file: col(/level code|file/i)
+    };
+    if (C.first < 0 || C.file < 0) throw new Error('Could not find the First Name or file upload column.');
+
+    const old = fresh ? {} : readData_().cache || {};
+    const cache = {};      // fileId -> code, so we never re-read a file
+    const byStudent = {};  // newest submission wins
+
+    rows
+      .filter(r => r[C.first] && r[C.file])
+      .sort((a, b) => new Date(a[C.time]) - new Date(b[C.time]))
+      .forEach(r => {
+        const ids = String(r[C.file]).match(/[-\w]{25,}/g);
+        if (!ids) return;
+        const id = ids[ids.length - 1]; // if they uploaded more than one, use the last
+        let code = old[id];
+        if (code === undefined) {
+          try {
+            code = readCodeFile_(id);
+          } catch (err) {
+            code = '';
+          }
+        }
+        cache[id] = code;
+        if (!code) return;
+
+        const first = properCase_(r[C.first]);
+        const last = C.last >= 0 ? properCase_(r[C.last]) : '';
+        const period = normPeriod_(C.period >= 0 ? r[C.period] : '');
+        const key = (C.email >= 0 && r[C.email] ? String(r[C.email]) : first + last + period).toLowerCase();
+
+        byStudent[key] = {
+          name: first + (last ? ' ' + last[0].toUpperCase() + '.' : ''), // first name + last initial only
+          period: period,
+          title: C.title >= 0 ? String(r[C.title]).trim() : '',
+          code: code
+        };
+      });
+
+    const levels = Object.values(byStudent);
+    writeData_({ updated: new Date().toISOString(), levels: levels, cache: cache });
+    return levels.length;
+  } finally {
+    lock.releaseLock();
   }
 }
 
-document.addEventListener('click',e=>{
-  const act=e.target.closest('[data-act]');
-  if(act){ if(act.dataset.act==='close'||act.dataset.act==='opened') setTimeout(closeModal,50); return; }
-  if(e.target.id==='modal'){ closeModal(); return; }
-  const b=e.target.closest('button'); if(!b) return;
-  if(b.dataset.p){ period=b.dataset.p; render(); return; }
-  if(b.dataset.i!==undefined) play(levels[+b.dataset.i]);
-});
-document.addEventListener('input',e=>{
-  if(!e.target.classList.contains('find')) return;
-  query=e.target.value; const pos=e.target.selectionStart; render();
-  const s=document.querySelector('.find'); s.focus(); s.setSelectionRange(pos,pos);
-});
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
-render();
-</script>
-</body>
-</html>
+// Reads a level code from a .txt upload, or from a Google Doc if a
+// student pasted their code into a Doc instead.
+function readCodeFile_(id) {
+  const file = DriveApp.getFileById(id);
+  let text;
+  if (file.getMimeType() === MimeType.GOOGLE_DOCS) {
+    text = DocumentApp.openById(id).getBody().getText()
+      .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'"); // undo smart quotes
+  } else {
+    text = file.getBlob().getDataAsString('UTF-8');
+  }
+  return text.replace(/^\uFEFF/, '').trim();
+}
+
+// "nAM", "NAM", " nam " -> "Nam". Handles "mary-jane" -> "Mary-Jane" and "ana maria" -> "Ana Maria".
+function properCase_(s) {
+  return String(s || '').trim().replace(/\s+/g, ' ').toLowerCase()
+    .replace(/(^|[\s\-'])(\p{L})/gu, (m, sep, ch) => sep + ch.toUpperCase());
+}
+
+function normPeriod_(p) {
+  const m = String(p).match(/\d/);
+  const names = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th'];
+  return m ? names[+m[0] - 1] || m[0] : (String(p).trim() || 'Other');
+}
+
+/* ---------- Data file (one small JSON file in your Drive) ---------- */
+
+function dataFile_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('DATA_FILE_ID');
+  if (id) {
+    try { return DriveApp.getFileById(id); } catch (e) {}
+  }
+  const f = DriveApp.createFile(CONFIG.DATA_FILE_NAME, '{"levels":[]}', 'application/json');
+  props.setProperty('DATA_FILE_ID', f.getId());
+  return f;
+}
+
+function readData_() {
+  try { return JSON.parse(dataFile_().getBlob().getDataAsString()); }
+  catch (e) { return { levels: [] }; }
+}
+
+function writeData_(obj) {
+  dataFile_().setContent(JSON.stringify(obj));
+}
+
+/* ---------- JSON feed for the GitHub page ---------- */
+
+// Deploy as a Web app with access set to "Anyone".
+// Only names (first + last initial), periods, titles and codes are shared. No emails.
+function doGet() {
+  const data = readData_();
+  const out = { updated: data.updated || null, levels: data.levels || [] };
+  return ContentService.createTextOutput(JSON.stringify(out))
+    .setMimeType(ContentService.MimeType.JSON);
+}
