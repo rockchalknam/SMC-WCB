@@ -24,7 +24,7 @@ h1{font:400 clamp(2.4rem,7vw,4.6rem)/1 Bungee,Impact,"Arial Black",sans-serif;ma
 .chip[aria-pressed="true"]{background:var(--brick);color:#fff}
 h2{font:400 1.6rem Bungee,Impact,sans-serif;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:0 3px 0 var(--ink);margin:34px 0 14px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
-.lvl{text-align:left;cursor:pointer;border:4px solid var(--ink);border-radius:12px;background:var(--block);color:#20160c;padding:16px;min-height:120px;font-family:inherit;box-shadow:inset 0 -6px 0 var(--block-edge),0 6px 0 var(--ink);transition:transform .08s,box-shadow .08s;display:flex;flex-direction:column;gap:6px}
+.lvl{text-decoration:none;text-align:left;cursor:pointer;border:4px solid var(--ink);border-radius:12px;background:var(--block);color:#20160c;padding:16px;min-height:120px;font-family:inherit;box-shadow:inset 0 -6px 0 var(--block-edge),0 6px 0 var(--ink);transition:transform .08s,box-shadow .08s;display:flex;flex-direction:column;gap:6px}
 .lvl:hover{transform:translateY(-2px);box-shadow:inset 0 -6px 0 var(--block-edge),0 8px 0 var(--ink)}
 .lvl:active{transform:translateY(5px);box-shadow:inset 0 -6px 0 var(--block-edge),0 1px 0 var(--ink)}
 .lvl .nm{font:400 1.4rem/1.1 Bungee,Impact,sans-serif}
@@ -59,8 +59,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:4px solid var(-
 </div>
 <script>
 /* ===== SETTINGS: edit these ===== */
-// Your Apps Script Web app URL (ends in /exec)
-const API_URL = 'https://script.google.com/macros/s/AKfycbxsQoOkp70MeYGILxFnmsOyKL8MaZPbkQv8qZVY9YLtiQQCk5Rh9gWjAd-r_NCQ2h5_/exec';
+// The level list the Google script saves next to this page
+const API_URL = 'levels.json';
 // Where "Open the game" goes
 const GAME_URL = 'https://levelsharesquare.com/games/supermarioconstruct';
 // What families do in the game tab, one click per line
@@ -68,6 +68,14 @@ const PASTE_STEPS = [
   'Click Play on the Level Share Square page.',
   'Click Play Level.',
   'Press Ctrl+V to paste the code (Cmd+V on a Mac). Have fun!'
+];
+// Students whose game lives somewhere else (like Bloxels).
+// Clicking their name opens the link directly. No copying, no popup.
+// Name format: first name + last initial, like 'Kaylena S.'
+// Period must match the page: '1st', '2nd', '3rd', '4th', '5th', '6th'
+const LINK_LEVELS = [
+  { name: 'Kaylena ?.', period: '?', title: '', url: 'PASTE_KAYLENA_BLOXELS_LINK' },
+  { name: 'Brighton ?.', period: '?', title: '', url: 'PASTE_BRIGHTON_BLOXELS_LINK' }
 ];
 /* ================================= */
 
@@ -77,7 +85,11 @@ const ORDER = ['1st','2nd','3rd','4th','5th','6th','7th'];
 let levels = [], periods = [];
 function setData(d){
   DATA = d;
-  levels = (d.levels||[]).map((l,i)=>Object.assign({i},l));
+  const isUrl = s => /^https?:\/\/\S+$/i.test(String(s||'').trim());
+  const links = LINK_LEVELS.filter(l=>isUrl(l.url));
+  // A student who uploads a .txt containing just a link also becomes a link card
+  const fed = (d.levels||[]).map(l=>isUrl(l.code)?Object.assign({},l,{url:l.code.trim()}):l);
+  levels = fed.concat(links).map((l,i)=>Object.assign({i},l));
   periods = [...new Set(levels.map(l=>l.period))]
     .sort((a,b)=>(ORDER.indexOf(a)+1||99)-(ORDER.indexOf(b)+1||99));
 }
@@ -97,6 +109,12 @@ async function copyText(text){
 }
 
 function block(l){
+  if(l.url){
+    const label = /bloxels/i.test(l.url) ? 'Play in Bloxels' : 'Open game';
+    return `<a class="lvl ${played.has(l.i)?'done':''}" href="${esc(l.url)}" target="_blank" rel="noopener" data-link="${l.i}">
+      <span class="nm">${esc(l.name)}</span>${l.title?`<span class="tt">${esc(l.title)}</span>`:''}
+      <span class="go">${label}</span></a>`;
+  }
   return `<button class="lvl ${played.has(l.i)?'done':''}" data-i="${l.i}">
     <span class="nm">${esc(l.name)}</span>${l.title?`<span class="tt">${esc(l.title)}</span>`:''}
     <span class="go">${played.has(l.i)?'Play again':'Play'}</span></button>`;
@@ -161,6 +179,8 @@ async function play(l){
 }
 
 document.addEventListener('click',e=>{
+  const link=e.target.closest('a[data-link]');
+  if(link){ played.add(+link.dataset.link); setTimeout(render,100); return; }
   const act=e.target.closest('[data-act]');
   if(act){ if(act.dataset.act==='close'||act.dataset.act==='opened') setTimeout(closeModal,50); return; }
   if(e.target.id==='modal'){ closeModal(); return; }
@@ -175,7 +195,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 render();
-fetch(API_URL)
+fetch(API_URL + '?t=' + Date.now(), { cache: 'no-store' })
   .then(r=>r.json())
   .then(d=>{ setData(d); status='ready'; render(); })
   .catch(()=>{ status='error'; render(); });
